@@ -181,10 +181,7 @@ impl PartialEq<SmolStr> for SmolStr {
                 // not quite sure what it's supposed to do
 
                 // can we just make it look like this?
-                // newlines1 == newlines2 && spaces1 == spaces2
-
-                &WS[N_NEWLINES - newlines1..N_NEWLINES + spaces1]
-                    == &WS[N_NEWLINES - newlines2..N_NEWLINES + spaces2]
+                newlines1 == newlines2 && spaces1 == spaces2
             }
             (Repr::Heap(heap), Repr::Heap(heap2)) => heap == heap2,
             _ => false,
