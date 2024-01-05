@@ -167,11 +167,7 @@ impl PartialEq<SmolStr> for SmolStr {
                     len: len2,
                     buf: buf2,
                 },
-            ) => {
-                let check = len1 == len2;
-                let check2 = &buf1[..*len1 as usize] == &buf2[..*len2 as usize];
-                check && check2
-            }
+            ) => &buf1[..*len1 as usize] == &buf2[..*len2 as usize],
             (
                 Repr::Substring {
                     newlines: newlines1,
@@ -183,12 +179,13 @@ impl PartialEq<SmolStr> for SmolStr {
                 },
             ) => {
                 // not quite sure what it's supposed to do
-                
+
                 // can we just make it look like this?
                 // newlines1 == newlines2 && spaces1 == spaces2
 
-                &WS[N_NEWLINES - newlines1..N_NEWLINES + spaces1] == &WS[N_NEWLINES - newlines2..N_NEWLINES + spaces2]
-            },
+                &WS[N_NEWLINES - newlines1..N_NEWLINES + spaces1]
+                    == &WS[N_NEWLINES - newlines2..N_NEWLINES + spaces2]
+            }
             (Repr::Heap(heap), Repr::Heap(heap2)) => heap == heap2,
             _ => false,
         }
