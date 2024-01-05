@@ -117,7 +117,7 @@ impl SmolStr {
         let (min_size, _) = iter.size_hint();
         if min_size > INLINE_CAP {
             let heap: String = iter.collect();
-            return SmolStr(Repr::Heap(heap.into_boxed_str().into()));
+            return SmolStr(Repr::new(heap));
         }
         let mut len = 0;
         let mut buf = [0u8; INLINE_CAP];
@@ -157,7 +157,41 @@ impl Deref for SmolStr {
 
 impl PartialEq<SmolStr> for SmolStr {
     fn eq(&self, other: &SmolStr) -> bool {
-        self.as_str() == other.as_str()
+        match (&self.0, &other.0) {
+            (
+                Repr::Inline {
+                    len: len1,
+                    buf: buf1,
+                },
+                Repr::Inline {
+                    len: len2,
+                    buf: buf2,
+                },
+            ) => {
+                let check = len1 == len2;
+                let check2 = &buf1[..*len1 as usize] == &buf2[..*len2 as usize];
+                check && check2
+            }
+            (
+                Repr::Substring {
+                    newlines: newlines1,
+                    spaces: spaces1,
+                },
+                Repr::Substring {
+                    newlines: newlines2,
+                    spaces: spaces2,
+                },
+            ) => {
+                // not quite sure what it's supposed to do
+                
+                // can we just make it look like this?
+                // newlines1 == newlines2 && spaces1 == spaces2
+
+                &WS[N_NEWLINES - newlines1..N_NEWLINES + spaces1] == &WS[N_NEWLINES - newlines2..N_NEWLINES + spaces2]
+            },
+            (Repr::Heap(heap), Repr::Heap(heap2)) => heap == heap2,
+            _ => false,
+        }
     }
 }
 
@@ -396,7 +430,7 @@ const N_SPACES: usize = 128;
 const WS: &str =
     "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n                                                                                                                                ";
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 enum InlineSize {
     _V0 = 0,

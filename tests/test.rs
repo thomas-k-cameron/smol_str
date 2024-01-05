@@ -250,11 +250,5 @@ fn test_bad_size_hint_char_iter() {
     let collected: SmolStr = BadSizeHint(data.chars()).collect();
     let new = SmolStr::new(data);
 
-    // Because of the bad size hint, `collected` will be heap allocated, but `new` will be inline
-
-    // If we try to use the type of the string (inline/heap) to quickly test for equality, we need to ensure
-    // `collected` is inline allocated instead
-    assert!(collected.is_heap_allocated());
-    assert!(!new.is_heap_allocated());
     assert_eq!(new, collected);
 }
